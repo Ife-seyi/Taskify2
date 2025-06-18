@@ -3,7 +3,7 @@ import { FaArrowLeft } from "react-icons/fa6";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { db } from "../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { deleteDoc, doc, getDoc } from "firebase/firestore";
 
 const EmailVerification = () => {
   const location = useLocation();
@@ -47,7 +47,10 @@ const EmailVerification = () => {
     }
 
     try {
-      const docRef = doc(db, "resetCodes", email);
+      const encodedEmail = email.replace(/\./g, "(dot)").replace(/@/g, "(at)");
+      const docRef = doc(db, "resetCodes", encodedEmail);
+      await deleteDoc(doc(db, "resetCodes", encodedEmail));
+
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
@@ -69,8 +72,6 @@ const EmailVerification = () => {
 
     setLoading(false);
   };
-
-
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">

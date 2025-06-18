@@ -36,8 +36,7 @@ const App = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<SplashScreen />} /> // Optional if you want to
-        access it directly
+        <Route path="/" element={<SplashScreen />} /> 
         <Route path="/get-started" element={<GetStarted />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

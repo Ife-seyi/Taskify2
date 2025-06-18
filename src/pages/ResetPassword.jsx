@@ -48,36 +48,42 @@ const ResetPassword = () => {
       return;
     }
 
-    console.log("Step 1: Starting password reset process");
-
     try {
       const generatedCode = Math.floor(
         100000 + Math.random() * 900000
       ).toString();
       const encodedEmail = email.replace(/\./g, "(dot)").replace(/@/g, "(at)");
 
-      console.log("Step 2: Writing to Firestore...");
+      // Store code in Firestore
       await setDoc(doc(db, "resetCodes", encodedEmail), {
         email,
         code: generatedCode,
         createdAt: serverTimestamp(),
       });
 
-      console.log("Step 3: Successfully wrote to Firestore");
+      // ✅ Send verification email using Vercel API
+      const response = await fetch(
+        'https://taskify-512rnm52u-ife-seyis-projects.vercel.app/api/sendCode',
+
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, code: generatedCode }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to send verification email");
+      }
+
       toast.success(`Verification code sent to ${email}`);
       navigate("/verify-email", { state: { email } });
     } catch (error) {
-      console.error("Firestore Error:", error);
+      console.error("Error during reset process:", error);
       toast.error("Something went wrong. Try again.");
     }
-
-    await fetch("https://taskify-i4um.vercel.app/api/sendCode", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, code: generatedCode }),
-    });
   };
 
   return (
