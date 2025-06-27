@@ -1,11 +1,17 @@
 import React, { useState } from "react";
-import { auth } from "../firebase";
+import { auth, messaging } from "../firebase";
 import { db } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { toast } from "react-hot-toast";
+import ModalDateTimePicker from "../components/ModalDateTimePicker";
+import axios from "axios";
+import { doc, getDoc } from "firebase/firestore";
+import { scheduleNotification } from "../../api/sendNotification";
+import { getToken } from "firebase/messaging";
 
 const AddTask = () => {
   const [title, setTitle] = useState("");
@@ -19,20 +25,69 @@ const AddTask = () => {
   const handleAddTask = async (e) => {
     e.preventDefault();
 
+    const token = await getToken(messaging, { vapidKey: "YOUR_VAPID_KEY" });
+    // eslint-disable-next-line no-undef
+    scheduleNotification(addedTask, token);
+    if (!title.trim() || !description.trim()) {
+      toast.error("Title and description are required.");
+      return;
+    }
+
     try {
-      await addDoc(collection(db, "tasks"), {
+      const taskData = {
         userId: auth.currentUser.uid,
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim(),
         timestamp: deadline ? deadline : serverTimestamp(),
         completed: false,
         priority,
-      });
+      };
 
-      alert("Task added!");
+      await addDoc(collection(db, "tasks"), taskData);
+      await notifyUser(title, deadline); // ✅ Call notification here
+      await fetch('/api/sendNotification', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ token, title, body }),
+});
+
+
+      // Reset form
+      setTitle("");
+      setDescription("");
+      setDeadline(null);
+      setPriority(false);
+
+      toast.success("Task added successfully!");
       navigate("/home");
     } catch (err) {
       console.error("Error adding task:", err);
+      toast.error("Failed to add task.");
+    }
+  };
+
+  const notifyUser = async (title, deadline) => {
+    try {
+      const tokenDoc = await getDoc(
+        doc(db, "userTokens", auth.currentUser.uid)
+      );
+      const token = tokenDoc.exists() ? tokenDoc.data().token : null;
+
+      if (token) {
+        await axios.post("/api/sendNotification", {
+          title: "Upcoming Task",
+          body: `Your task "${title}" is due by ${deadline.toLocaleTimeString(
+            [],
+            {
+              hour: "2-digit",
+              minute: "2-digit",
+            }
+          )}`,
+          token,
+        });
+      }
+    } catch (err) {
+      console.error("Notification error:", err);
     }
   };
 
@@ -40,28 +95,11 @@ const AddTask = () => {
     <div className="min-h-screen bg-[#E6F7F6] px-5 py-6 relative">
       {/* Backdrop Blur Modal */}
       {showPicker && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded-lg shadow-lg z-50">
-            <DatePicker
-              selected={deadline}
-              onChange={(date) => {
-                setDeadline(date);
-                setShowPicker(false);
-              }}
-              showTimeSelect
-              inline
-              timeFormat="HH:mm"
-              timeIntervals={15}
-              dateFormat="MMMM d, yyyy h:mm aa"
-            />
-            <button
-              onClick={() => setShowPicker(false)}
-              className="mt-3 text-[#4FBDBA] font-semibold"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+        <ModalDateTimePicker
+          deadline={deadline}
+          setDeadline={setDeadline}
+          onClose={() => setShowPicker(false)}
+        />
       )}
 
       {/* Header */}
@@ -110,9 +148,7 @@ const AddTask = () => {
             onClick={() => setShowPicker(true)}
             className="w-full p-3 border rounded text-left text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-[#4FBDBA]"
           >
-            {deadline
-              ? deadline.toLocaleString()
-              : "Select date and time"}
+            {deadline ? deadline.toLocaleString() : "Select date and time"}
           </button>
         </div>
 
@@ -138,7 +174,6 @@ const AddTask = () => {
 };
 
 export default AddTask;
-
 
 // import React, { useState } from "react";
 // import { FaApple } from "react-icons/fa";

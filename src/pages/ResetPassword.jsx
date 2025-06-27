@@ -63,7 +63,7 @@ const ResetPassword = () => {
 
       // ✅ Send verification email using Vercel API
       const response = await fetch(
-        'https://taskify-512rnm52u-ife-seyis-projects.vercel.app/api/sendCode',
+        'https://taskify-ay7017a3j-ife-seyis-projects.vercel.app/api/sendCode',
 
         {
           method: "POST",

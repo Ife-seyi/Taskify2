@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { AiFillHome } from "react-icons/ai";
 import { FaPlusCircle } from "react-icons/fa";
 import { MdDone } from "react-icons/md";
+import { FaCalendarAlt } from "react-icons/fa";
 
 const BottomNav = () => {
   const location = useLocation();
@@ -18,6 +19,7 @@ const BottomNav = () => {
         <AiFillHome size={24} />
         <p className="text-xs">Home</p>
       </Link>
+
       <Link
         to="/add-task"
         className={`text-center ${
@@ -27,16 +29,25 @@ const BottomNav = () => {
         <FaPlusCircle size={24} />
         <p className="text-xs">Add Task</p>
       </Link>
+
       <Link
-        to="/completed"
+        to="/tasks"
         className={`text-center ${
-          location.pathname === "/completed"
-            ? "text-[#4FBDBA]"
-            : "text-gray-400"
+          location.pathname === "/tasks" ? "text-[#4FBDBA]" : "text-gray-400"
         }`}
       >
         <MdDone size={24} />
-        <p className="text-xs">Completed</p>
+        <p className="text-xs">Tasks</p>
+      </Link>
+
+      <Link
+        to="/calendar"
+        className={`text-center ${
+          location.pathname === "/calendar" ? "text-[#4FBDBA]" : "text-gray-400"
+        }`}
+      >
+        <FaCalendarAlt size={24} />
+        <p className="text-xs">Calendar</p>
       </Link>
     </nav>
   );

@@ -1,29 +1,27 @@
-export default async function handler(req, res) {
-  // CORS headers for every request
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+// export default async function handler(req, res) {
+//   // ✅ Set CORS headers for both OPTIONS and POST
+//   res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+//   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+//   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // Handle preflight (OPTIONS) request
-  if (req.method === "OPTIONS") {
-    res.status(200).end();
-    return;
-  }
+//   // ✅ Handle preflight request
+//   if (req.method === "OPTIONS") {
+//     return res.status(200).end();
+//   }
 
-  if (req.method === "POST") {
-    try {
-      const { email, code } = req.body;
+//   if (req.method !== "POST") {
+//     return res.status(405).json({ error: "Method not allowed" });
+//   }
 
-      // Place your SendGrid or logic here (can be mocked for now)
-      console.log(`Sending code ${code} to ${email}`);
+//   try {
+//     const { email, code } = req.body;
 
-      res.status(200).json({ message: "Email sent successfully" });
-    } catch (error) {
-      console.error("Error in sendCode API:", error);
-      res.status(500).json({ error: "Failed to send email" });
-    }
-  } else {
-    res.setHeader("Allow", ["POST"]);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
-  }
-}
+//     // ✅ Dummy send or real logic
+//     console.log(`Sending code ${code} to ${email}`);
+
+//     return res.status(200).json({ message: "Email sent successfully" });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ error: "Failed to send email" });
+//   }
+// }

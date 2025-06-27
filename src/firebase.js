@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { browserLocalPersistence, getAuth, GoogleAuthProvider, setPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -17,3 +18,4 @@ export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 setPersistence(auth, browserLocalPersistence);
 export const db = getFirestore(app);
+export const messaging = getMessaging(app);

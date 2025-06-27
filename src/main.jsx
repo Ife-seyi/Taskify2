@@ -7,6 +7,9 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { Toaster } from "react-hot-toast"; // Import Toaster
 import "./index.css";
 
+import { registerSW } from 'virtual:pwa-register';
+registerSW();
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Router>
